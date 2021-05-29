@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,7 +20,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    static int counter = 0  ;
+    //static int counter = 0  ;
     private Timer myTimer    ;
 
     private Button btn_on, btn_off, listDevices, btn_update ;
@@ -27,15 +28,22 @@ public class MainActivity extends AppCompatActivity {
     private TextView status   ;
     private BluetoothAdapter myBluetoothAdapter ;
     private BluetoothDevice[] btArray   ;
+
     private Intent btEnablingIntent ;
+    int requestCodeForEnable    ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()   ;
+        btEnablingIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)   ;
+        requestCodeForEnable = 1    ;
+
         displayUpdatedTime();                   //запуск отображения времени и даты
         findViewByIdes();                       //присваивание переменным элементов активити
         stateOnStart();                         //установка начального состояния элементов активити
+        bluetoothOn();                          //обработка нажатия кнопки включения bluetooth
     }
 
     /**
@@ -72,6 +80,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Метод устанавливает значения элементов активити после нажатия кнопки выключения
+     */
+    private void stateOnPressed() {
+        btn_on.setEnabled(false) ;
+        btn_off.setEnabled(true)   ;
+        listDevices.setEnabled(true)   ;
+        listView.setVisibility(View.VISIBLE)    ;
+        btn_update.setEnabled(false);
+    }
+
+    /**
+     * Метод для обработки нажатия кнопки включения блютуз
+     */
+    private void bluetoothOn() {
+        btn_on.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (myBluetoothAdapter == null) {
+                    Toast.makeText(getApplicationContext(),"Bluetooth does not support on this device!", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    if (!myBluetoothAdapter.isEnabled()) {
+                        startActivityForResult(btEnablingIntent, requestCodeForEnable);
+                        //добавить проверку вкл/выкл блютуз
+                        stateOnPressed();
+                    }
+                    else {
+                        stateOnPressed();
+                    }
+                }
+            }
+        });
+    }
+
+    /**
      * Класс, имплементирующий таймер.
      */
     class MyTimerTask extends TimerTask {
@@ -95,7 +138,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-
-
     }
 }
