@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
                     if (!myBluetoothAdapter.isEnabled()) {
                         startActivityForResult(btEnablingIntent, requestCodeForEnable);
                         stateOnPressed();
-                        //тут надо будет доработать код
                     }
                     else {
                         stateOnPressed();
