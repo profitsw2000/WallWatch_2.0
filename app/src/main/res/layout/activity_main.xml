@@ -10,36 +10,37 @@
         android:id="@+id/timeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:text="@string/ww_time"
         android:textColor="@color/led_green"
-        android:textSize="58sp"
+        android:textSize="60sp"
+        android:includeFontPadding="false"
+        app:layout_constraintBottom_toTopOf="@id/dateText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/dateText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:text="@string/ww_data"
         android:textColor="@color/led_red"
         android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:includeFontPadding="false"
+        app:layout_constraintBottom_toTopOf="@id/BT_ON"
+        app:layout_constraintEnd_toEndOf="@id/timeText"
         app:layout_constraintTop_toBottomOf="@+id/timeText" />
 
     <Button
         android:id="@+id/BT_ON"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_margin="8dp"
         android:text="@string/BT_ON"
+        app:layout_constraintBaseline_toBaselineOf="@id/BT_OFF"
+        app:layout_constraintBottom_toTopOf="@id/listView"
+        app:layout_constraintEnd_toStartOf="@id/BT_OFF"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dateText" />
 
@@ -47,10 +48,9 @@
         android:id="@+id/BT_OFF"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginLeft="12dp"
-        android:layout_marginTop="16dp"
+        android:layout_margin="8dp"
         android:text="@string/BT_OFF"
+        app:layout_constraintBottom_toTopOf="@id/listView"
         app:layout_constraintStart_toEndOf="@+id/BT_ON"
         app:layout_constraintTop_toBottomOf="@+id/dateText" />
 
@@ -58,44 +58,46 @@
         android:id="@+id/bt_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_margin="8dp"
         android:text="@string/bt_status"
         android:textColor="@color/black"
         android:textSize="18sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/BT_OFF"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dateText" />
 
     <ListView
         android:id="@+id/listView"
-        android:layout_width="380dp"
-        android:layout_height="150dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="8dp"
+        android:background="#ECE9E9"
+        app:layout_constraintBottom_toTopOf="@id/listDevices"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.529"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/BT_ON" />
 
     <Button
-        android:id="@+id/update"
-        android:layout_width="380dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/update_time"
+        android:id="@+id/listDevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/listDevices"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.516"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listDevices" />
+        app:layout_constraintTop_toBottomOf="@+id/listView"
+        app:layout_constraintBottom_toTopOf="@id/update"/>
 
     <Button
-        android:id="@+id/listDevices"
-        android:layout_width="380dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/listDevices"
+        android:id="@+id/update"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/update_time"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.486"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listView" />
+        app:layout_constraintTop_toBottomOf="@+id/listDevices" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
