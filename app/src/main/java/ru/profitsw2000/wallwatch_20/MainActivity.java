@@ -4,25 +4,42 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    static final int STATE_LISTENING = 1    ;
+    static final int STATE_CONNECTING = 2   ;
+    static final int STATE_CONNECTED = 3    ;
+    static final int STATE_CONNECTION_FAILED = 4    ;
+    private static final String APP_NAME = "BTChat"    ;
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") ;
+
     private Timer myTimer    ;
+    private SendReceive sendReceive ;
 
     private Button btn_on, btn_off, listDevices, btn_update ;
     private ListView listView   ;
@@ -47,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         bluetoothOn();                          //обработка нажатия кнопки включения bluetooth
         bluetoothOff();                          //обработка нажатия кнопки выключения bluetooth
         listPairedDevices();                    //вывести список парных устройств
+        pickupDevice();                         //обработка нажатия пользователем элемента из списка
     }
 
     /**
@@ -178,6 +196,45 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    private void pickupDevice() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                listView.setVisibility(View.GONE);
+                btn_update.setEnabled(true);
+                ClientClass clientClass = new ClientClass(btArray[i])   ;
+                clientClass.start() ;
+                status.setText("Connecting");
+            }
+        });
+    }
+
+    /**
+     * Метод для возврата сообщения при запросе
+     */
+    Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            switch (message.what)
+            {
+                case STATE_LISTENING:
+                    status.setText("Listening");
+                    break;
+                case STATE_CONNECTING:
+                    status.setText("Connecting");
+                    break   ;
+                case STATE_CONNECTED:
+                    status.setText("Connected");
+                    break;
+                case STATE_CONNECTION_FAILED:
+                    status.setText("Connection failed");
+                    break;
+            }
+            return true;
+        }
+    });
+
     /**
      * Класс, имплементирующий таймер.
      */
@@ -203,4 +260,96 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    private class ClientClass extends  Thread{
+        private BluetoothDevice device  ;
+        private BluetoothSocket socket  ;
+
+        public ClientClass(BluetoothDevice device1)
+        {
+            device = device1    ;
+
+            try {
+                socket = device.createInsecureRfcommSocketToServiceRecord(MY_UUID)  ;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void run()
+        {
+            try {
+                socket.connect();
+                Message message = Message.obtain()  ;
+                message.what = STATE_CONNECTED  ;
+                handler.sendMessage(message)    ;
+                sendReceive = new SendReceive(socket);
+                sendReceive.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Message message = Message.obtain()  ;
+                message.what = STATE_CONNECTION_FAILED  ;
+                handler.sendMessage(message)    ;
+            }
+        }
+    }
+
+    private class SendReceive extends Thread
+    {
+        private final BluetoothSocket bluetoothSocket ;
+        private final InputStream inputStream   ;
+        private final OutputStream outputStream ;
+
+        public SendReceive (BluetoothSocket socket)
+        {
+            bluetoothSocket = socket    ;
+            InputStream tempIn = null   ;
+            OutputStream tempOut = null ;
+
+            try {
+                tempIn = bluetoothSocket.getInputStream()   ;
+                tempOut = bluetoothSocket.getOutputStream() ;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            inputStream = tempIn    ;
+            outputStream = tempOut  ;
+        }
+
+        public void run()
+        {
+            byte[] buffer = new  byte[1024] ;
+            int bytes   ;
+
+            while (true)
+            {
+                try {
+                    bytes = inputStream.read(buffer)    ;
+                    //handler.obtainMessage(STATE_MESSAGE_RECEIVED,bytes,-1,buffer).sendToTarget();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void write(byte[] bytes)
+        {
+            try {
+                outputStream.write(bytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void write_byte(byte bytes)
+        {
+            try {
+                outputStream.write(bytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
