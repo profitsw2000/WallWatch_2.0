@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         stateOnStart();                         //установка начального состояния элементов активити
         bluetoothOn();                          //обработка нажатия кнопки включения bluetooth
         bluetoothOff();                          //обработка нажатия кнопки выключения bluetooth
+        listPairedDevices();                    //вывести список парных устройств
     }
 
     /**
@@ -147,6 +150,33 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * Показать список парных устройств.
+     */
+    private void listPairedDevices() {
+        listDevices.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Set<BluetoothDevice> bt = myBluetoothAdapter.getBondedDevices() ;
+                String[] strings = new String[bt.size()]    ;
+                btArray = new BluetoothDevice[bt.size()]    ;
+                int index = 0   ;
+
+                if (bt.size() > 0)
+                {
+                    for (BluetoothDevice device : bt)
+                    {
+                        btArray[index] = device ;
+                        strings[index] = device.getName()   ;
+                        index++ ;
+                    }
+
+                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, strings) ;
+                    listView.setAdapter(arrayAdapter);
+                }
+            }
+        });
+    }
 
     /**
      * Класс, имплементирующий таймер.
