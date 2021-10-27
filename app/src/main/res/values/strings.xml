@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WallWatch_2.0</string>
+    <string name="app_name">Обновление времени</string>
     <string name="ww_time">12:34:56</string>
     <string name="ww_data">10.05 Пн</string>
     <string name="BT_ON">ON</string>

@@ -20,7 +20,6 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    static int counter = 0  ;
     private Timer myTimer    ;
 
     private Button btn_on, btn_off, listDevices, btn_update ;
@@ -44,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         findViewByIdes();                       //присваивание переменным элементов активити
         stateOnStart();                         //установка начального состояния элементов активити
         bluetoothOn();                          //обработка нажатия кнопки включения bluetooth
+        bluetoothOff();                          //обработка нажатия кнопки выключения bluetooth
     }
 
     /**
@@ -103,15 +103,50 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     if (!myBluetoothAdapter.isEnabled()) {
                         startActivityForResult(btEnablingIntent, requestCodeForEnable);
-                        stateOnPressed();
                     }
-                    else {
                         stateOnPressed();
-                    }
                 }
             }
         });
     }
+
+    /**
+     * Выключение bluetooth
+     */
+    private void bluetoothOff() {
+        btn_off.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stateOnStart();
+                if (myBluetoothAdapter.isEnabled()) {
+                    myBluetoothAdapter.disable()    ;
+                    Toast.makeText(getApplicationContext(),"Bluetooth is disabled!", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    /**
+     * Проверка результата действий пользователя на запрос о включении Bluetooth
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == requestCodeForEnable)
+        {
+            if(resultCode == RESULT_OK)
+            {
+                Toast.makeText(getApplicationContext(),"Bluetooth is enabled", Toast.LENGTH_LONG).show();
+                stateOnPressed();
+            }
+            else if (resultCode == RESULT_CANCELED)
+            {
+                Toast.makeText(getApplicationContext(),"Bluetooth enabling cancelled", Toast.LENGTH_LONG).show();
+                stateOnStart();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
 
     /**
      * Класс, имплементирующий таймер.
