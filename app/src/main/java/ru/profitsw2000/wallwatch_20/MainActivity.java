@@ -65,6 +65,13 @@ public class MainActivity extends AppCompatActivity {
         bluetoothOff();                          //обработка нажатия кнопки выключения bluetooth
         listPairedDevices();                    //вывести список парных устройств
         pickupDevice();                         //обработка нажатия пользователем элемента из списка
+        updateTime();                           //обновление времени (кнопка "обновить")
+    }
+
+    @Override
+    protected void onDestroy() { // Закрытие приложения
+        super.onDestroy();
+        myBluetoothAdapter.disable()    ;
     }
 
     /**
@@ -196,7 +203,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
+    /**
+     * выбор устройства из списка для подключения к нему
+     */
     private void pickupDevice() {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -208,6 +217,89 @@ public class MainActivity extends AppCompatActivity {
                 status.setText("Connecting");
             }
         });
+    }
+
+    /**
+     * Отправка посылки на устройство с целью обновления времени
+     */
+    private void updateTime() {
+        btn_update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar calendar = Calendar.getInstance()    ;
+                SimpleDateFormat format_td = new SimpleDateFormat("HH:mm:ss dd.MM ")   ;
+                String date_time = format_td.format(calendar.getTime())  ;
+                String probel = " " ;
+                //sendReceive.write(date_time.getBytes());
+                byte[] packet = new byte[9] ;
+                byte temp   ;
+                int summa = 0  ;
+
+                summa = 0xCC ;
+                packet[0] = (byte) summa   ;
+
+                int currentSecond = Calendar.getInstance().get(Calendar.SECOND) ;
+                temp = fromIntToByte(currentSecond)     ;
+                packet[1] = temp  ;
+                summa = summa + temp    ;
+
+                int currentMinute = Calendar.getInstance().get(Calendar.MINUTE) ;
+                temp = fromIntToByte(currentMinute)     ;
+                packet[2] = temp  ;
+                summa = summa + temp    ;
+
+                int currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) ;
+                temp = fromIntToByte(currentHour)     ;
+                packet[3] = temp  ;
+                summa = summa + temp    ;
+
+                int currentDayofWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) ;
+                currentDayofWeek = currentDayofWeek - 1 ;
+                if (currentDayofWeek < 1) currentDayofWeek = 7  ;
+                temp = fromIntToByte(currentDayofWeek)     ;
+                packet[4] = temp  ;
+                summa = summa + temp    ;
+
+                int currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH) ;
+                temp = fromIntToByte(currentDay)     ;
+                packet[5] = temp  ;
+                summa = summa + temp    ;
+
+                int currentMonth = Calendar.getInstance().get(Calendar.MONTH) ;
+                currentMonth = currentMonth + 1 ;
+                temp = fromIntToByte(currentMonth)     ;
+                packet[6] = temp  ;
+                summa = summa + temp    ;
+
+                int currentYear = Calendar.getInstance().get(Calendar.YEAR) ;
+                currentYear = currentYear%100   ;
+                temp = fromIntToByte(currentYear)     ;
+                packet[7] = temp  ;
+                summa = summa + temp    ;
+
+                packet[8] = (byte) summa    ;
+
+                sendReceive.write(packet);
+            }
+        });
+    }
+
+    /**
+     * Метод конвертирует первый байт числа типа int в число типа byte в кодировке bcd(binary coded decimal)
+     * @param number число в типа int, которое нужно конвертировать
+     * @return число типа byte в формате bcd
+     */
+    byte fromIntToByte(int number)
+    {
+        byte decimals   ;
+        byte units  ;
+        byte result ;
+
+        decimals = (byte) (number/10)    ;
+        units = (byte) (number%10)   ;
+        result = (byte) ((decimals << 4) | units);
+
+        return result   ;
     }
 
     /**
